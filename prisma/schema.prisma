@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ArtPiece {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  title       String  @db.VarChar(255)
+  description String? @db.LongText
+  images      Image[]
+  year        Int
+  module      Int
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  image      Bytes
+  artPiece   ArtPiece @relation(fields: [artPieceId], references: [id])
+  artPieceId String
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  username  String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+}
