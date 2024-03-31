@@ -90,10 +90,28 @@ export const saveArtPiece = async (req, res) => {
 
 // Delete product
 export const deleteArtPiece = async (req, res) => {
-  const deleted = await prisma.artPiece.delete({
-    where: {
-      id: req.params.id,
-    },
-  });
-  res.json({ data: deleted });
+  try {
+    // Start a transaction
+    await prisma.$transaction([
+      // Delete associated Media objects
+      prisma.media.deleteMany({
+        where: {
+          artPieceId: req.params.id,
+        },
+      }),
+      // Delete the ArtPiece itself
+      prisma.artPiece.delete({
+        where: {
+          id: req.params.id,
+        },
+      }),
+    ]);
+
+    res.json({
+      message: "Art piece and associated media deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting art piece:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
