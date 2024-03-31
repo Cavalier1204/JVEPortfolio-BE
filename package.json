@@ -1,10 +1,19 @@
 {
+  "name": "jve-portfolio-backend",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node src/index.ts",
+    "format": "prettier --write \"src/**/*.{js,ts}\""
+  },
   "dependencies": {
     "@prisma/client": "^5.11.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-validator": "^7.0.1",
+    "firebase": "^10.10.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0"
   },

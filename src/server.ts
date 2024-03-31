@@ -1,8 +1,11 @@
 import express from "express";
-import router from "./router";
+import protectedRouter from "./routers/protectedRouter";
+import publicRouter from "./routers/publicRouter";
 import morgan from "morgan";
 import { protect } from "./modules/auth";
 import { createNewUser, signin } from "./handlers/user";
+import { body } from "express-validator";
+import { handleInputErrors } from "./modules/middleware";
 
 const app = express();
 
@@ -10,20 +13,23 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.shh_secret = "message";
-  next();
-});
-app.get("/", (req, res) => {
-  console.log("Hello, world!");
-  res.status(200);
-  res.json({ message: "hello" });
-});
+app.use("/api", protect, protectedRouter);
+app.use("/public", publicRouter);
 
-app.use("/api", protect, router);
-
-app.post("/user", createNewUser);
-app.post("/signin", signin);
+app.post(
+  "/user",
+  body("username").isString(),
+  body("password").isString(),
+  handleInputErrors,
+  createNewUser
+);
+app.post(
+  "/signin",
+  body("username").isString(),
+  body("password").isString(),
+  handleInputErrors,
+  signin
+);
 
 app.use((err, req, res, next) => {
   res.json({ message: err });

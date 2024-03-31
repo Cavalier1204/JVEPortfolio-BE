@@ -12,19 +12,20 @@ model ArtPiece {
   createdAt DateTime @default(now())
 
   title       String  @db.VarChar(255)
-  description String? @db.LongText
-  images      Image[]
+  description String  @db.LongText
+  media       Media[]
   year        Int
   module      Int
 }
 
-model Image {
+model Media {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
 
-  image      Bytes
-  artPiece   ArtPiece @relation(fields: [artPieceId], references: [id])
-  artPieceId String
+  locationReference String
+  order             Int
+  artPiece          ArtPiece @relation(fields: [artPieceId], references: [id])
+  artPieceId        String
 }
 
 model User {
