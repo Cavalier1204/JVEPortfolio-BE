@@ -4,7 +4,7 @@ import {
   getOneArtPiece,
 } from "../handlers/artpiece";
 import { query } from "express-validator";
-import { handleInputErrors } from "../modules/middleware";
+import { handleInputErrors, parseQueryToInt } from "../modules/middleware";
 
 const router = Router();
 
@@ -13,6 +13,7 @@ const router = Router();
  */
 router.get(
   "/artpiece",
+  parseQueryToInt,
   query("year")
     .isInt({ min: 1, max: 4 })
     .withMessage("Year must be an integer"),
