@@ -1,8 +1,9 @@
 {
   "name": "jve-portfolio-backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.ts",
   "scripts": {
+    "start": "ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/index.ts",
     "format": "prettier --write \"src/**/*.{js,ts}\""
