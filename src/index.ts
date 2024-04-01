@@ -3,4 +3,4 @@ dotenv.config();
 
 import app from "./server";
 
-app.listen(3001, () => {});
+app.listen(8000, () => {});
