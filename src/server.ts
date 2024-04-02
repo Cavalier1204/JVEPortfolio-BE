@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import protectedRouter from "./routers/protectedRouter";
 import publicRouter from "./routers/publicRouter";
 import morgan from "morgan";
@@ -9,9 +10,25 @@ import { handleInputErrors } from "./modules/middleware";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://i511801.luna.fhict.nl",
+];
+
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 
 app.use("/api", protect, protectedRouter);
 app.use("/public", publicRouter);

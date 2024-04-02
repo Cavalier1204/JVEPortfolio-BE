@@ -38,6 +38,7 @@ router.post(
     "THEORIE",
     "SKILLS",
     "POSITIONERING",
+    "PORTFOLIO",
   ]),
   handleInputErrors,
   saveArtPiece
