@@ -107,9 +107,11 @@ export const deleteArtPiece = async (req, res) => {
       }),
     ]);
 
-    res.json({
-      message: "Art piece and associated media deleted successfully",
-    });
+    res
+      .json({
+        message: "Art piece and associated media deleted successfully",
+      })
+      .status(204);
   } catch (error) {
     console.error("Error deleting art piece:", error);
     res.status(500).json({ error: "Internal server error" });

@@ -7,6 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Subject {
+  WERKPRAKTIJK_1
+  WERKPRAKTIJK_2
+  THEORIE
+  SKILLS
+  POSITIONERING
+}
+
 model ArtPiece {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
@@ -16,6 +24,7 @@ model ArtPiece {
   media       Media[]
   year        Int
   module      Int
+  subject     Subject
 }
 
 model Media {
