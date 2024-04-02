@@ -41,7 +41,7 @@ export const getOneArtPiece = async (req, res) => {
 export const saveArtPiece = async (req, res) => {
   try {
     // Extract validated fields from the request body
-    const { title, description, year, module, media } = req.body;
+    const { title, description, year, module, media, subject } = req.body;
 
     // Create the ArtPiece
     const createdArtPiece = await prisma.artPiece.create({
@@ -59,6 +59,7 @@ export const saveArtPiece = async (req, res) => {
             })),
           },
         },
+        subject,
       },
       include: {
         media: true, // Include related media in the response
