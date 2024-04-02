@@ -16,13 +16,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", protect, protectedRouter);
 app.use("/public", publicRouter);
 
-app.post(
-  "/user",
-  body("username").isString(),
-  body("password").isString(),
-  handleInputErrors,
-  createNewUser
-);
+// app.post(
+//   "/user",
+//   body("username").isString(),
+//   body("password").isString(),
+//   handleInputErrors,
+//   createNewUser
+// );
 app.post(
   "/signin",
   body("username").isString(),
