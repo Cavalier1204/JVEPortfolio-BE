@@ -6,6 +6,7 @@ import {
   saveArtPiece,
   // updateArtPiece,
 } from "../handlers/artpiece";
+import { Subject } from "@prisma/client";
 
 const router = Router();
 
@@ -31,6 +32,13 @@ router.post(
   body("media").isArray(), // Check if 'media' is an array
   body("media.*.locationReference").isString(), // Check if each 'media' object has 'locationReference' as string
   body("media.*.order").isInt(),
+  body("subject").isIn([
+    "WERKPRAKTIJK_1",
+    "WERKPRAKTIJK_2",
+    "THEORIE",
+    "SKILLS",
+    "POSITIONERING",
+  ]),
   handleInputErrors,
   saveArtPiece
 );
