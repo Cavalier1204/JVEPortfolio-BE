@@ -18,28 +18,18 @@ const allowedOrigins = [
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-  })
-);
+app.use(cors());
 
 app.use("/api", protect, protectedRouter);
 app.use("/public", publicRouter);
 
-// app.post(
-//   "/user",
-//   body("username").isString(),
-//   body("password").isString(),
-//   handleInputErrors,
-//   createNewUser
-// );
+app.post(
+  "/user",
+  body("username").isString(),
+  body("password").isString(),
+  handleInputErrors,
+  createNewUser
+);
 app.post(
   "/signin",
   body("username").isString(),
