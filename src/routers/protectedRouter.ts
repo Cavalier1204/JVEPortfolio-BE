@@ -4,21 +4,15 @@ import { body } from "express-validator";
 import {
   deleteArtPiece,
   saveArtPiece,
-  // updateArtPiece,
+  updateArtPiece,
 } from "../handlers/artpiece";
-import { Subject } from "@prisma/client";
 
 const router = Router();
 
 /**
  * ArtPiece
  */
-// router.put(
-//   "/artpiece/:id",
-//   body("name").isString(),
-//   handleInputErrors,
-//   updateArtPiece
-// );
+router.put("/artpiece/:id", handleInputErrors, updateArtPiece);
 router.post(
   "/artpiece",
   body("title").isString(),
