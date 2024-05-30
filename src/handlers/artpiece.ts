@@ -4,7 +4,10 @@ import prisma from "../db";
 // Get by year by module
 export const getArtPiecesByYearByModule = async (req, res) => {
   const artPieces = await prisma.artPiece.findMany({
-    where: req.query,
+    where: {
+      year: req.query.year,
+      module: req.query.module,
+    },
     include: {
       media: true,
     },
@@ -23,6 +26,8 @@ export const getArtPiecesByYearByModuleBySubject = async (req, res) => {
     artPieces = await prisma.artPiece.findMany({
       where: {
         subject: { in: [Subject.WERKPRAKTIJK_1, Subject.WERKPRAKTIJK_2] },
+        year: req.query.year,
+        module: req.query.module,
       },
       include: {
         media: true,
@@ -35,6 +40,8 @@ export const getArtPiecesByYearByModuleBySubject = async (req, res) => {
     artPieces = await prisma.artPiece.findMany({
       where: {
         subject: { in: [Subject.THEORIE, Subject.SKILLS] },
+        year: req.query.year,
+        module: req.query.module,
       },
       include: {
         media: true,
@@ -47,6 +54,8 @@ export const getArtPiecesByYearByModuleBySubject = async (req, res) => {
     artPieces = await prisma.artPiece.findMany({
       where: {
         subject: Subject.POSITIONERING,
+        year: req.query.year,
+        module: req.query.module,
       },
       include: {
         media: true,
