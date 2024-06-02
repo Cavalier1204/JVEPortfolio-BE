@@ -6,6 +6,7 @@ import {
   saveArtPiece,
   updateArtPiece,
 } from "../handlers/artpiece";
+import { updateMedia } from "../handlers/media";
 
 const router = Router();
 
@@ -38,5 +39,10 @@ router.post(
   saveArtPiece
 );
 router.delete("/artpiece/:id", deleteArtPiece);
+
+/**
+ * Media
+ */
+router.put("/media/:artPieceId", handleInputErrors, updateMedia);
 
 export default router;
