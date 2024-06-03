@@ -131,13 +131,30 @@ export const saveArtPiece = async (req, res) => {
 
 // Update artPiece
 export const updateArtPiece = async (req, res) => {
-  const updated = await prisma.artPiece.update({
-    where: {
-      id: req.params.id,
-    },
-    data: req.body,
-  });
-  res.json({ data: updated });
+  try {
+    // Destructure year and module from req.body, and gather the rest of the fields in 'rest'
+    const { year, module, ...rest } = req.body;
+
+    // Construct the dataToUpdate object, including year and module if they are defined
+    const dataToUpdate = {
+      ...rest,
+      ...(year !== undefined && { year: parseInt(year, 10) }),
+      ...(module !== undefined && { module: parseInt(module, 10) }),
+    };
+
+    // Perform the update operation using Prisma
+    const updated = await prisma.artPiece.update({
+      where: {
+        id: req.params.id,
+      },
+      data: dataToUpdate,
+    });
+    res.json({ data: updated });
+  } catch (error) {
+    // Handle any errors and send a 500 response
+    console.error("Error updating ArtPiece:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 // Delete artPiece
