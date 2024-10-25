@@ -18,13 +18,12 @@ export const updateMedia = async (req, res) => {
     ]);
 
     for (const mediaItem of req.body.updatedMedia) {
-      // Perform individual update for each art piece
       await prisma.media.update({
         where: {
-          id: mediaItem.id, // Specify the ID of the art piece
+          id: mediaItem.id,
         },
         data: {
-          order: mediaItem.order, // Set the new order value
+          order: mediaItem.order,
         },
       });
     }

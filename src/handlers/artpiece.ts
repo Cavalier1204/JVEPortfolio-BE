@@ -1,5 +1,6 @@
 import { Subject } from "@prisma/client";
 import prisma from "../db";
+import validModules from "../data/year-structure.json";
 
 // Get by year by module
 export const getArtPiecesByYearByModule = async (req, res) => {
@@ -12,7 +13,7 @@ export const getArtPiecesByYearByModule = async (req, res) => {
       media: true,
     },
     orderBy: {
-      createdAt: "asc", // Sort from oldest to newest based on createdAt field
+      createdAt: "asc",
     },
   });
   res.json({ data: artPieces });
@@ -33,7 +34,7 @@ export const getArtPiecesByYearByModuleBySubject = async (req, res) => {
         media: true,
       },
       orderBy: {
-        createdAt: "asc", // Sort from oldest to newest based on createdAt field
+        createdAt: "asc",
       },
     });
   } else if (subjectParam === "kennis") {
@@ -47,7 +48,7 @@ export const getArtPiecesByYearByModuleBySubject = async (req, res) => {
         media: true,
       },
       orderBy: {
-        createdAt: "asc", // Sort from oldest to newest based on createdAt field
+        createdAt: "asc",
       },
     });
   } else if (subjectParam === "positionering") {
@@ -61,7 +62,7 @@ export const getArtPiecesByYearByModuleBySubject = async (req, res) => {
         media: true,
       },
       orderBy: {
-        createdAt: "asc", // Sort from oldest to newest based on createdAt field
+        createdAt: "asc",
       },
     });
   } else {
@@ -96,17 +97,20 @@ export const getOneArtPiece = async (req, res) => {
 // Create artPiece
 export const saveArtPiece = async (req, res) => {
   try {
-    // Extract validated fields from the request body
     const { title, description, year, module, media, subject } = req.body;
 
-    // Create the ArtPiece
+    if (!validModules[year as string]?.includes(module)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid module for the specified year" });
+    }
+
     const createdArtPiece = await prisma.artPiece.create({
       data: {
         title,
         description,
         year,
         module,
-        // Create associated Media objects
         media: {
           createMany: {
             data: media.map((m) => ({
@@ -118,7 +122,7 @@ export const saveArtPiece = async (req, res) => {
         subject,
       },
       include: {
-        media: true, // Include related media in the response
+        media: true,
       },
     });
 
@@ -132,17 +136,20 @@ export const saveArtPiece = async (req, res) => {
 // Update artPiece
 export const updateArtPiece = async (req, res) => {
   try {
-    // Destructure year and module from req.body, and gather the rest of the fields in 'rest'
     const { year, module, ...rest } = req.body;
 
-    // Construct the dataToUpdate object, including year and module if they are defined
+    if (!validModules[year as string]?.includes(module)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid module for the specified year" });
+    }
+
     const dataToUpdate = {
       ...rest,
       ...(year !== undefined && { year: parseInt(year, 10) }),
       ...(module !== undefined && { module: parseInt(module, 10) }),
     };
 
-    // Perform the update operation using Prisma
     const updated = await prisma.artPiece.update({
       where: {
         id: req.params.id,
@@ -151,7 +158,6 @@ export const updateArtPiece = async (req, res) => {
     });
     res.json({ data: updated });
   } catch (error) {
-    // Handle any errors and send a 500 response
     console.error("Error updating ArtPiece:", error);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -160,15 +166,12 @@ export const updateArtPiece = async (req, res) => {
 // Delete artPiece
 export const deleteArtPiece = async (req, res) => {
   try {
-    // Start a transaction
     await prisma.$transaction([
-      // Delete associated Media objects
       prisma.media.deleteMany({
         where: {
           artPieceId: req.params.id,
         },
       }),
-      // Delete the ArtPiece itself
       prisma.artPiece.delete({
         where: {
           id: req.params.id,
@@ -197,7 +200,7 @@ export const getPortfolioPieces = async (req, res) => {
       media: true,
     },
     orderBy: {
-      createdAt: "asc", // Sort from oldest to newest based on createdAt field
+      createdAt: "asc",
     },
   });
   res.json({ data: portfolioPieces });

@@ -2,6 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "outDir": "./dist",
+    "resolveJsonModule": true,
     "rootDir": "./src",
     "strict": false,
     "lib": ["esnext"],
