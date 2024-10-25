@@ -20,7 +20,7 @@ router.get(
     .isInt({ min: 1, max: 4 })
     .withMessage("Year must be an integer"),
   query("module")
-    .isInt({ min: 1, max: 4 })
+    .isInt({ min: 1, max: 16 })
     .withMessage("Module must be an integer"),
   handleInputErrors,
   getArtPiecesByYearByModule
@@ -32,7 +32,7 @@ router.get(
     .isInt({ min: 1, max: 4 })
     .withMessage("Year must be an integer"),
   query("module")
-    .isInt({ min: 1, max: 4 })
+    .isInt({ min: 1, max: 16 })
     .withMessage("Module must be an integer"),
   query("subject").isIn(["werkpraktijk", "kennis", "positionering"]),
   handleInputErrors,

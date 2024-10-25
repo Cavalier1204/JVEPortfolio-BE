@@ -22,10 +22,10 @@ router.post(
     .isInt({ min: 1, max: 4 })
     .withMessage("Value must be between 1 and 4"),
   body("module")
-    .isInt({ min: 1, max: 4 })
+    .isInt({ min: 1, max: 16 })
     .withMessage("Value must be between 1 and 4"),
-  body("media").isArray(), // Check if 'media' is an array
-  body("media.*.locationReference").isString(), // Check if each 'media' object has 'locationReference' as string
+  body("media").isArray(),
+  body("media.*.locationReference").isString(),
   body("media.*.order").isInt(),
   body("subject").isIn([
     "WERKPRAKTIJK_1",
