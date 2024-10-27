@@ -23,7 +23,7 @@ router.post(
     .withMessage("Value must be between 1 and 4"),
   body("module")
     .isInt({ min: 1, max: 16 })
-    .withMessage("Value must be between 1 and 4"),
+    .withMessage("Value must be between 1 and 16"),
   body("media").isArray(),
   body("media.*.locationReference").isString(),
   body("media.*.order").isInt(),
