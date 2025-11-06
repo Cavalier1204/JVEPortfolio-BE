@@ -12,6 +12,16 @@ const subjects: Subject[] = [
 ];
 
 async function main() {
+  const dbUrl = process.env.DATABASE_URL ?? "";
+
+  if (
+    process.env.NODE_ENV === "production" ||
+    dbUrl.includes("koyeb") ||
+    dbUrl.includes("ep-damp-dew")
+  ) {
+    throw new Error("❌ Seeding aborted: production database detected!");
+  }
+
   await prisma.user.create({
     data: {
       username: "testuser1",
