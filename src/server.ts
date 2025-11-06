@@ -20,6 +20,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Server running healthy!" });
+});
+
 app.use("/api", protect, protectedRouter);
 app.use("/public", publicRouter);
 
