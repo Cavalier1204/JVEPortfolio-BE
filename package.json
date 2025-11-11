@@ -1,6 +1,6 @@
 {
   "name": "jve-portfolio-backend",
-  "version": "1.1.2",
+  "version": "1.2",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,11 @@
     "start": "NODE_ENV=production node dist/index.js",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "prisma:development": "dotenv -e .env.development -- npx prisma studio",
-    "prisma:production": "dotenv -e .env.production -- npx prisma studio"
+    "prisma:production": "dotenv -e .env.production -- npx prisma studio",
+    "seed": "npx prisma migrate reset --force"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.11.0",
