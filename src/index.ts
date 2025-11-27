@@ -3,4 +3,4 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
 import app from "./server";
 
-app.listen(8000, () => {});
+app.listen(8000, "0.0.0.0", () => {});
