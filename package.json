@@ -1,9 +1,11 @@
 {
   "name": "jve-portfolio-backend",
-  "version": "1.2",
+  "version": "1.2.0",
   "main": "index.ts",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "NODE_ENV=development ts-node src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "NODE_ENV=production node dist/index.js",

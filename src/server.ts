@@ -11,7 +11,7 @@ import { handleInputErrors } from "./modules/middleware";
 const app = express();
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: JSON.parse(process.env.ALLOWED_ORIGINS ?? "[]"),
   methods: ["GET", "POST", "PUT", "DELETE"],
 };
 
