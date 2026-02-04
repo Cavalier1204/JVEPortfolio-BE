@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { handleInputErrors } from "../modules/middleware";
+import { handleInputErrors } from "../middleware/middleware";
 import { body } from "express-validator";
 import {
   deleteArtPiece,
   saveArtPiece,
   updateArtPiece,
-} from "../handlers/artpiece";
-import { updateMedia } from "../handlers/media";
+} from "../services/artpiece";
+import { updateMedia } from "../services/media";
 
 const router = Router();
 
@@ -36,7 +36,7 @@ router.post(
     "PORTFOLIO",
   ]),
   handleInputErrors,
-  saveArtPiece
+  saveArtPiece,
 );
 router.delete("/artpiece/:id", deleteArtPiece);
 

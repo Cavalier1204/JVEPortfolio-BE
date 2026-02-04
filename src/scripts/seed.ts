@@ -1,7 +1,7 @@
-import { PrismaClient, Subject } from "@prisma/client";
-import { hashPassword } from "../src/modules/auth";
-
-const prisma = new PrismaClient();
+import { hashPassword } from "../middleware/auth";
+import prisma from "../config/prisma";
+import { env } from "../config/env";
+import { Subject } from "../generated/prisma/enums";
 
 const subjects: Subject[] = [
   Subject.WERKPRAKTIJK_1,
@@ -12,10 +12,10 @@ const subjects: Subject[] = [
 ];
 
 async function main() {
-  const dbUrl = process.env.DATABASE_URL ?? "";
+  const dbUrl = env.DATABASE_URL ?? "";
 
   if (
-    process.env.NODE_ENV === "production" ||
+    env.NODE_ENV === "production" ||
     dbUrl.includes("koyeb") ||
     dbUrl.includes("ep-damp-dew")
   ) {
@@ -59,4 +59,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    console.log("Database seeded!");
   });
