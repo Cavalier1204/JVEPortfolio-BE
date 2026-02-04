@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
-
+import "dotenv/config";
 import app from "./server";
 
-app.listen(8000, () => {});
+app.listen(process.env.PORT, () => {
+  console.log("NODE_ENV:", process.env.NODE_ENV, "PORT:", process.env.PORT);
+});
