@@ -1,5 +1,5 @@
 import { Subject } from "@prisma/client";
-import prisma from "../db";
+import prisma from "../config/prisma";
 import validModules from "../data/year-structure.json";
 
 // Get by year by module

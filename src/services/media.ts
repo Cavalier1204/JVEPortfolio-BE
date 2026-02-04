@@ -1,4 +1,4 @@
-import prisma from "../db";
+import prisma from "../config/prisma";
 
 export const updateMedia = async (req, res) => {
   try {

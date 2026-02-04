@@ -4,9 +4,9 @@ import {
   getArtPiecesByYearByModuleBySubject,
   getOneArtPiece,
   getPortfolioPieces,
-} from "../handlers/artpiece";
+} from "../services/artpiece";
 import { query } from "express-validator";
-import { handleInputErrors, parseQueryToInt } from "../modules/middleware";
+import { handleInputErrors, parseQueryToInt } from "../middleware/middleware";
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.get(
     .isInt({ min: 1, max: 16 })
     .withMessage("Module must be an integer"),
   handleInputErrors,
-  getArtPiecesByYearByModule
+  getArtPiecesByYearByModule,
 );
 router.get(
   "/subject",
@@ -36,7 +36,7 @@ router.get(
     .withMessage("Module must be an integer"),
   query("subject").isIn(["werkpraktijk", "kennis", "positionering"]),
   handleInputErrors,
-  getArtPiecesByYearByModuleBySubject
+  getArtPiecesByYearByModuleBySubject,
 );
 router.get("/artpiece/:id", getOneArtPiece);
 
