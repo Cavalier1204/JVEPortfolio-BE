@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { Request, Response, NextFunction } from "express";
+import { User } from "@prisma/client";
 
-export const createJWT = (user) => {
+export const createJWT = (user: User) => {
   const token = jwt.sign(
     {
       id: user.id,
@@ -12,7 +14,7 @@ export const createJWT = (user) => {
   return token;
 };
 
-export const protect = (req, res, next) => {
+export const protect = (req: Request, res: Response, next: NextFunction) => {
   const bearer = req.headers.authorization;
 
   if (!bearer) {

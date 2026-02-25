@@ -1,5 +1,9 @@
 import prisma from "../config/prisma";
-import { comparePasswords, createJWT, hashPassword } from "../middleware/auth";
+import {
+  comparePasswords,
+  createJWT,
+  hashPassword,
+} from "../middleware/auth.middleware";
 
 export const createNewUser = async (req, res, next) => {
   try {
