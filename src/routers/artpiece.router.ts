@@ -1,20 +1,20 @@
 import { Router } from "express";
 import { body, query } from "express-validator";
-import { handleInputErrors, parseQueryToInt } from "../middleware/middleware";
 import {
-  deleteArtPiece,
-  getArtPiecesByYearByModule,
-  getArtPiecesByYearByModuleBySubject,
-  getOneArtPiece,
-  getPortfolioPieces,
-  saveArtPiece,
-  updateArtPiece,
-} from "../services/artpiece";
-import { protect } from "../middleware/auth";
+  handleInputErrors,
+  parseQueryToInt,
+} from "../middleware/validation.middleware";
+import artPieceController from "../controllers/artPiece.controller";
+import { protect } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.put("/:id", protect, handleInputErrors, updateArtPiece);
+router.put(
+  "/:id",
+  protect,
+  handleInputErrors,
+  artPieceController.updateArtPieceHandler,
+);
 router.post(
   "/",
   protect,
@@ -38,9 +38,9 @@ router.post(
     "PORTFOLIO",
   ]),
   handleInputErrors,
-  saveArtPiece,
+  artPieceController.createArtPieceHandler,
 );
-router.delete("/:id", protect, deleteArtPiece);
+router.delete("/:id", protect, artPieceController.deleteArtPieceHandler);
 
 router.get(
   "/module",
@@ -52,7 +52,7 @@ router.get(
     .isInt({ min: 1, max: 16 })
     .withMessage("Module must be an integer"),
   handleInputErrors,
-  getArtPiecesByYearByModule,
+  artPieceController.getArtPiecesByYearModuleHandler,
 );
 router.get(
   "/subject",
@@ -65,9 +65,9 @@ router.get(
     .withMessage("Module must be an integer"),
   query("subject").isIn(["werkpraktijk", "kennis", "positionering"]),
   handleInputErrors,
-  getArtPiecesByYearByModuleBySubject,
+  artPieceController.getArtPiecesByYearModuleSubjectHandler,
 );
-router.get("/:id", getOneArtPiece);
-router.get("/portfolio", getPortfolioPieces);
+router.get("/:id", artPieceController.getArtPieceHandler);
+router.get("/portfolio", artPieceController.getPortfolioArtPiecesHandler);
 
 export default router;

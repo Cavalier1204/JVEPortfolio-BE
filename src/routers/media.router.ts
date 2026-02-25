@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { handleInputErrors } from "../middleware/middleware";
-import { updateMedia } from "../services/media";
-import { protect } from "../middleware/auth";
+import { handleInputErrors } from "../middleware/validation.middleware";
+import { updateMedia } from "../services/media.services";
+import { protect } from "../middleware/auth.middleware";
 
 const router = Router();
 

@@ -1,4 +1,4 @@
-import { hashPassword } from "../middleware/auth";
+import { hashPassword } from "../middleware/auth.middleware";
 import prisma from "../config/prisma";
 import { env } from "../config/env";
 import { Subject } from "../generated/prisma/enums";
@@ -38,7 +38,7 @@ async function main() {
         for (let i = 0; i < 3; i++) {
           await prisma.artPiece.create({
             data: {
-              title: "Artpiece title " + (i + 1),
+              title: "ArtPiece title " + (i + 1),
               description:
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempus, augue sit amet ullamcorper tempus, erat odio lobortis purus, eget auctor magna ligula vitae lectus. Nulla varius sagittis maximus. Sed sed rhoncus odio. Sed pellentesque risus ut ipsum malesuada, vel varius dolor volutpat. Curabitur blandit sem ut consectetur pellentesque. Maecenas a hendrerit augue. Praesent euismod ipsum nec maximus semper. Sed a sapien at enim placerat bibendum. Maecenas at lectus justo. Phasellus nec placerat ex. ",
               year,

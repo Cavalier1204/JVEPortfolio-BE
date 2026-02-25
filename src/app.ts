@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import artpieceRouter from "./routers/artpiece.router";
+import artPieceRouter from "./routers/artPiece.router";
 import mediaRouter from "./routers/media.router";
 import userRouter from "./routers/user.router";
 import { env } from "./config/env";
+import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
 
@@ -31,12 +32,10 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok", message: "Server running healthy!" });
 });
 
-app.use("/artpiece", artpieceRouter);
+app.use("/artPiece", artPieceRouter);
 app.use("/media", mediaRouter);
 app.use("/user", userRouter);
 
-app.use((err, _req, res, _next) => {
-  res.json({ message: err });
-});
+app.use(errorHandler);
 
 export default app;
