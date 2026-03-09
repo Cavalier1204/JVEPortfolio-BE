@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
-import { User } from "@prisma/client";
+import { env } from "../config/env";
 
 export const createJWT = (user: User) => {
   const token = jwt.sign(
@@ -9,7 +9,7 @@ export const createJWT = (user: User) => {
       id: user.id,
       username: user.username,
     },
-    process.env.JWT_SECRET,
+    env.JWT_SECRET,
   );
   return token;
 };
@@ -31,7 +31,7 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET);
+    const user = jwt.verify(token, env.JWT_SECRET);
     req.user = user;
     next();
   } catch (e) {
@@ -42,10 +42,10 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export const comparePasswords = (password, hash) => {
+export const comparePasswords = (password: string, hash: string) => {
   return bcrypt.compare(password, hash);
 };
 
-export const hashPassword = (password) => {
+export const hashPassword = (password: string) => {
   return bcrypt.hash(password, 5);
 };

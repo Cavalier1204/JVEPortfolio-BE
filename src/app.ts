@@ -11,7 +11,10 @@ const app = express();
 
 const WHITELIST = env.ALLOWED_ORIGINS;
 var corsOptions = {
-  origin: function (origin, callback) {
+  origin: function (
+    origin: string | undefined,
+    callback: (arg0: Error | null, arg1?: boolean | undefined) => void,
+  ) {
     if (!origin) return callback(null, true);
 
     if (WHITELIST.indexOf(origin) !== -1) {

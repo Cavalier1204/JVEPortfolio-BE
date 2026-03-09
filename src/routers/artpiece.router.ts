@@ -1,73 +1,44 @@
 import { Router } from "express";
-import { body, query } from "express-validator";
+import {
+  CreateArtPieceSchema,
+  GetArtPiecesQuerySchema,
+  GetArtPiecesSubjectQuerySchema,
+} from "../types/artPiece.types";
 import {
   handleInputErrors,
-  parseQueryToInt,
+  validate,
+  validateQuery,
 } from "../middleware/validation.middleware";
 import artPieceController from "../controllers/artPiece.controller";
 import { protect } from "../middleware/auth.middleware";
 
 const router = Router();
 
+router.post(
+  "/",
+  protect,
+  validate(CreateArtPieceSchema),
+  artPieceController.createArtPieceHandler,
+);
+router.get("/:id", artPieceController.getArtPieceHandler);
+router.get(
+  "/module",
+  validateQuery(GetArtPiecesQuerySchema),
+  artPieceController.getArtPiecesByYearModuleHandler,
+);
+router.get(
+  "/subject",
+  validateQuery(GetArtPiecesSubjectQuerySchema),
+  artPieceController.getArtPiecesByYearModuleSubjectHandler,
+);
 router.put(
   "/:id",
   protect,
   handleInputErrors,
   artPieceController.updateArtPieceHandler,
 );
-router.post(
-  "/",
-  protect,
-  body("title").isString(),
-  body("description").isString(),
-  body("year")
-    .isInt({ min: 1, max: 4 })
-    .withMessage("Value must be between 1 and 4"),
-  body("module")
-    .isInt({ min: 1, max: 16 })
-    .withMessage("Value must be between 1 and 16"),
-  body("media").isArray(),
-  body("media.*.locationReference").isString(),
-  body("media.*.order").isInt(),
-  body("subject").isIn([
-    "WERKPRAKTIJK_1",
-    "WERKPRAKTIJK_2",
-    "THEORIE",
-    "SKILLS",
-    "POSITIONERING",
-    "PORTFOLIO",
-  ]),
-  handleInputErrors,
-  artPieceController.createArtPieceHandler,
-);
 router.delete("/:id", protect, artPieceController.deleteArtPieceHandler);
 
-router.get(
-  "/module",
-  parseQueryToInt,
-  query("year")
-    .isInt({ min: 1, max: 4 })
-    .withMessage("Year must be an integer"),
-  query("module")
-    .isInt({ min: 1, max: 16 })
-    .withMessage("Module must be an integer"),
-  handleInputErrors,
-  artPieceController.getArtPiecesByYearModuleHandler,
-);
-router.get(
-  "/subject",
-  parseQueryToInt,
-  query("year")
-    .isInt({ min: 1, max: 4 })
-    .withMessage("Year must be an integer"),
-  query("module")
-    .isInt({ min: 1, max: 16 })
-    .withMessage("Module must be an integer"),
-  query("subject").isIn(["werkpraktijk", "kennis", "positionering"]),
-  handleInputErrors,
-  artPieceController.getArtPiecesByYearModuleSubjectHandler,
-);
-router.get("/:id", artPieceController.getArtPieceHandler);
 router.get("/portfolio", artPieceController.getPortfolioArtPiecesHandler);
 
 export default router;
