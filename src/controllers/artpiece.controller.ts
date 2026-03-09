@@ -7,7 +7,7 @@ import {
   findArtPiecesByYearModule,
   findArtPiecesByYearModuleSubject,
   listPortfolioPieces,
-} from "../services/artPiece.services";
+} from "../services/artPiece.service";
 import { CreateArtPieceInput } from "../types/artPiece.types";
 
 export const createArtPieceHandler = async (

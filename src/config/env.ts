@@ -14,4 +14,12 @@ export const env = {
   ALLOWED_ORIGINS: required("ALLOWED_ORIGINS"),
   DATABASE_URL: required("DATABASE_URL"),
   JWT_SECRET: required("JWT_SECRET"),
+
+  DB: {
+    HOST: required("DB_HOST"),
+    PORT: parseInt(process.env.DB_PORT ?? "5432"),
+    USERNAME: required("DB_USERNAME"),
+    PASSWORD: required("DB_PASSWORD"),
+    NAME: required("DB_NAME"),
+  },
 };
