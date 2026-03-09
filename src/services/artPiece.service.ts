@@ -1,34 +1,41 @@
-import { Subject } from "@prisma/client";
-import prisma from "../config/prisma";
-import validModules from "../data/year-structure.json";
+import { validModules } from "../types/yearStructure";
 import { CreateArtPieceInput } from "../types/artPiece.types";
 import { InvalidModuleError } from "../errors/domain.errors";
+import { db } from "../drizzle/db";
+import { artPiece, media } from "../drizzle/schema";
 
 export const createArtPiece = async (input: CreateArtPieceInput) => {
-  const { title, description, year, module, media, subject } = input;
-  if (!validModules[year]?.includes(module)) {
+  const {
+    title,
+    description,
+    year,
+    module,
+    media: mediaItems,
+    subject,
+  } = input;
+  if (!validModules[year].includes(module)) {
     throw new InvalidModuleError("Invalid module for the specified year");
   }
 
-  return prisma.artPiece.create({
-    data: {
-      title,
-      description,
-      year,
-      module,
-      subject,
-      media: {
-        createMany: {
-          data: media.map((m) => ({
-            locationReference: m.locationReference,
-            order: m.order,
-          })),
-        },
-      },
-    },
-    include: {
-      media: true,
-    },
+  await db.transaction(async (tx) => {
+    const [artPieceRow] = await tx
+      .insert(artPiece)
+      .values({ title, description, year, module, subject })
+      .returning();
+
+    if (mediaItems && mediaItems.length) {
+      await tx.insert(media).values(
+        mediaItems.map((item) => ({
+          ...item,
+          artPieceId: artPieceRow.id,
+        })),
+      );
+    }
+
+    return {
+      ...artPieceRow,
+      media: mediaItems || [],
+    };
   });
 };
 
