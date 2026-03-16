@@ -8,7 +8,10 @@ import {
   findArtPiecesByYearModuleSubject,
   listPortfolioPieces,
 } from "../services/artPiece.service";
-import { CreateArtPieceInput } from "../types/artPiece.types";
+import {
+  CreateArtPieceInput,
+  UpdateArtPieceInput,
+} from "../types/artPiece.types";
 
 export const createArtPieceHandler = async (
   req: Request,
@@ -26,7 +29,23 @@ export const createArtPieceHandler = async (
   }
 };
 
-export const updateArtPieceHandler = async (req, res) => {};
+export const updateArtPieceHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id: string = req.params.id;
+
+    const input: UpdateArtPieceInput = req.body;
+
+    const updated = await updateArtPiece(id, input);
+
+    return res.status(200).json({ data: updated });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const deleteArtPieceHandler = async (req, res) => {};
 

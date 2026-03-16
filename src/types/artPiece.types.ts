@@ -17,6 +17,34 @@ export const CreateArtPieceSchema = z.object({
 
 export type CreateArtPieceInput = z.infer<typeof CreateArtPieceSchema>;
 
+export const UpdateArtPieceSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  year: z.number().int().min(1).max(4).optional(),
+  module: z.number().int().min(1).max(16).optional(),
+  subject: z.enum(Subject).optional(),
+  deletedMedia: z.array(z.string()).optional(),
+  updatedMedia: z
+    .array(
+      z.object({
+        id: z.string(),
+        locationReference: z.string().optional(),
+        order: z.number().int().optional(),
+      }),
+    )
+    .optional(),
+  newMedia: z
+    .array(
+      z.object({
+        locationReference: z.string(),
+        order: z.number().int(),
+      }),
+    )
+    .optional(),
+});
+
+export type UpdateArtPieceInput = z.infer<typeof UpdateArtPieceSchema>;
+
 export const GetArtPiecesQuerySchema = z.object({
   year: z.coerce.number().int().min(1).max(4),
   module: z.coerce.number().int().min(1).max(16),
