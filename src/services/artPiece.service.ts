@@ -1,5 +1,8 @@
 import { validModules } from "../types/yearStructure";
-import { CreateArtPieceInput } from "../types/artPiece.types";
+import {
+  CreateArtPieceInput,
+  UpdateArtPieceInput,
+} from "../types/artPiece.types";
 import { InvalidModuleError } from "../errors/domain.errors";
 import { db } from "../drizzle/db";
 import { artPiece, media } from "../drizzle/schema";
@@ -39,33 +42,23 @@ export const createArtPiece = async (input: CreateArtPieceInput) => {
   });
 };
 
-export const updateArtPiece = async (req, res) => {
-  try {
-    const { year, module, ...rest } = req.body;
+export const updateArtPiece = async (
+  id: string,
+  input: UpdateArtPieceInput,
+) => {
+  const { year, module, ...rest } = input;
 
-    if (!validModules[year as string]?.includes(module)) {
-      return res
-        .status(400)
-        .json({ error: "Invalid module for the specified year" });
-    }
-
-    const dataToUpdate = {
-      ...rest,
-      ...(year !== undefined && { year: parseInt(year, 10) }),
-      ...(module !== undefined && { module: parseInt(module, 10) }),
-    };
-
-    const updated = await prisma.artPiece.update({
-      where: {
-        id: req.params.id,
-      },
-      data: dataToUpdate,
-    });
-    res.json({ data: updated });
-  } catch (error) {
-    console.error("Error updating ArtPiece:", error);
-    res.status(500).json({ error: "Internal server error" });
+  if (!validModules[year as number].includes(module as number)) {
+    throw new InvalidModuleError("Invalid module for the specified year");
   }
+
+  const updated = await prisma.artPiece.update({
+    where: {
+      id: req.params.id,
+    },
+    data: rest,
+  });
+  return updated;
 };
 
 export const deleteArtPiece = async (req, res) => {

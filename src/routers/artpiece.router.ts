@@ -3,12 +3,9 @@ import {
   CreateArtPieceSchema,
   GetArtPiecesQuerySchema,
   GetArtPiecesSubjectQuerySchema,
+  UpdateArtPieceSchema,
 } from "../types/artPiece.types";
-import {
-  handleInputErrors,
-  validate,
-  validateQuery,
-} from "../middleware/validation.middleware";
+import { validate, validateQuery } from "../middleware/validation.middleware";
 import artPieceController from "../controllers/artPiece.controller";
 import { protect } from "../middleware/auth.middleware";
 
@@ -34,7 +31,7 @@ router.get(
 router.put(
   "/:id",
   protect,
-  handleInputErrors,
+  validate(UpdateArtPieceSchema),
   artPieceController.updateArtPieceHandler,
 );
 router.delete("/:id", protect, artPieceController.deleteArtPieceHandler);
