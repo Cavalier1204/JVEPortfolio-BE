@@ -17,25 +17,30 @@ router.post(
   validate(CreateArtPieceSchema),
   artPieceController.createArtPieceHandler,
 );
-router.get("/:id", artPieceController.getArtPieceHandler);
+
 router.get(
   "/module",
   validateQuery(GetArtPiecesQuerySchema),
   artPieceController.getArtPiecesByYearModuleHandler,
 );
+
 router.get(
   "/subject",
   validateQuery(GetArtPiecesSubjectQuerySchema),
   artPieceController.getArtPiecesByYearModuleSubjectHandler,
 );
+
+router.get("/portfolio", artPieceController.getPortfolioArtPiecesHandler);
+
+router.get("/:id", artPieceController.getArtPieceHandler);
+
 router.put(
   "/:id",
   protect,
   validate(UpdateArtPieceSchema),
   artPieceController.updateArtPieceHandler,
 );
-router.delete("/:id", protect, artPieceController.deleteArtPieceHandler);
 
-router.get("/portfolio", artPieceController.getPortfolioArtPiecesHandler);
+router.delete("/:id", protect, artPieceController.deleteArtPieceHandler);
 
 export default router;

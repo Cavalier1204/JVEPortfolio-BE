@@ -7,6 +7,6 @@ dist
 .env.*
 !.env.example
 .prettierrc
-/src/generated/prisma
 .DS_Store
+coverage
 

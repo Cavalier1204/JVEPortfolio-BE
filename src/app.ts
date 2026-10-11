@@ -6,6 +6,7 @@ import mediaRouter from "./routers/media.router";
 import userRouter from "./routers/user.router";
 import { env } from "./config/env";
 import { errorHandler } from "./middleware/error.middleware";
+import { setupSwagger } from "./docs/swagger";
 
 const app = express();
 
@@ -30,6 +31,8 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
+
+setupSwagger(app);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok", message: "Server running healthy!" });
