@@ -29,10 +29,5 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Run tests
-        run: npm test
-        if: false
-
-      - name: Prisma Studio (optional check)
-        run: npm run prisma:development
-        if: false
+      - name: Run tests with coverage
+        run: npm run test:coverage

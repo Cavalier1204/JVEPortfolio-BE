@@ -9,3 +9,7 @@ export class InvalidModuleError extends DomainError {
 export class ArtPieceNotFoundError extends DomainError {
   statusCode = 404;
 }
+
+export class UnauthorizedError extends DomainError {
+  statusCode = 401;
+}

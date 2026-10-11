@@ -1,7 +1,8 @@
 import { hashPassword } from "../middleware/auth.middleware";
-import prisma from "../config/prisma";
+import { db } from "../drizzle/db";
+import { user, artPiece } from "../drizzle/schema";
 import { env } from "../config/env";
-import { Subject } from "../generated/prisma/enums";
+import { Subject } from "../types/enums/subject";
 
 const subjects: Subject[] = [
   Subject.WERKPRAKTIJK_1,
@@ -22,11 +23,9 @@ async function main() {
     throw new Error("❌ Seeding aborted: production database detected!");
   }
 
-  await prisma.user.create({
-    data: {
-      username: "testuser1",
-      password: await hashPassword("password123"),
-    },
+  await db.insert(user).values({
+    username: "testuser1",
+    password: await hashPassword("password123"),
   });
 
   for (let year = 1; year <= 4; year++) {
@@ -36,15 +35,13 @@ async function main() {
     for (let module = moduleStart; module <= moduleEnd; module++) {
       for (const subject of subjects) {
         for (let i = 0; i < 3; i++) {
-          await prisma.artPiece.create({
-            data: {
-              title: "ArtPiece title " + (i + 1),
-              description:
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempus, augue sit amet ullamcorper tempus, erat odio lobortis purus, eget auctor magna ligula vitae lectus. Nulla varius sagittis maximus. Sed sed rhoncus odio. Sed pellentesque risus ut ipsum malesuada, vel varius dolor volutpat. Curabitur blandit sem ut consectetur pellentesque. Maecenas a hendrerit augue. Praesent euismod ipsum nec maximus semper. Sed a sapien at enim placerat bibendum. Maecenas at lectus justo. Phasellus nec placerat ex. ",
-              year,
-              module,
-              subject,
-            },
+          await db.insert(artPiece).values({
+            title: "ArtPiece title " + (i + 1),
+            description:
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempus, augue sit amet ullamcorper tempus, erat odio lobortis purus, eget auctor magna ligula vitae lectus. Nulla varius sagittis maximus. Sed sed rhoncus odio. Sed pellentesque risus ut ipsum malesuada, vel varius dolor volutpat. Curabitur blandit sem ut consectetur pellentesque. Maecenas a hendrerit augue. Praesent euismod ipsum nec maximus semper. Sed a sapien at enim placerat bibendum. Maecenas at lectus justo. Phasellus nec placerat ex. ",
+            year,
+            module,
+            subject,
           });
         }
       }
@@ -58,6 +55,6 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
     console.log("Database seeded!");
+    process.exit(0);
   });

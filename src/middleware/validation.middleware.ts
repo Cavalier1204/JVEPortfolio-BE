@@ -1,23 +1,29 @@
 import { NextFunction, Request, Response } from "express";
-import { ZodObject } from "zod";
+import { ZodTypeAny } from "zod";
 
 export const validate =
-  (schema: ZodObject) => (req: Request, res: Response, next: NextFunction) => {
+  (schema: ZodTypeAny) => (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body = schema.parse(req.body);
       next();
     } catch (error: any) {
-      return res.status(400).json({ errors: error.errors });
+      const errors = error.issues ?? error.errors ?? [error.message];
+      return res.status(400).json({ errors });
     }
   };
 
 export const validateQuery =
-  (schema: ZodObject<any, any>) =>
+  (schema: ZodTypeAny) =>
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      req.query = schema.parse(req.query);
+      const parsed = schema.parse(req.query);
+      for (const key of Object.keys(req.query)) {
+        delete (req.query as any)[key];
+      }
+      Object.assign(req.query, parsed);
       next();
     } catch (error: any) {
-      return res.status(400).json({ errors: error.errors });
+      const errors = error.issues ?? error.errors ?? [error.message];
+      return res.status(400).json({ errors });
     }
   };

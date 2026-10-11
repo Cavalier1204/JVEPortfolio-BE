@@ -28,7 +28,6 @@ export const UpdateArtPieceSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        locationReference: z.string().optional(),
         order: z.number().int().optional(),
       }),
     )

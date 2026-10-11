@@ -3,9 +3,14 @@ import {
   CreateArtPieceInput,
   UpdateArtPieceInput,
 } from "../types/artPiece.types";
-import { InvalidModuleError } from "../errors/domain.errors";
+import {
+  ArtPieceNotFoundError,
+  InvalidModuleError,
+} from "../errors/domain.errors";
 import { db } from "../drizzle/db";
 import { artPiece, media } from "../drizzle/schema";
+import { and, asc, eq, inArray } from "drizzle-orm";
+import { Subject } from "../types/enums/subject";
 
 export const createArtPiece = async (input: CreateArtPieceInput) => {
   const {
@@ -16,28 +21,33 @@ export const createArtPiece = async (input: CreateArtPieceInput) => {
     media: mediaItems,
     subject,
   } = input;
-  if (!validModules[year].includes(module)) {
+
+  if (!validModules[year]?.includes(module)) {
     throw new InvalidModuleError("Invalid module for the specified year");
   }
 
-  await db.transaction(async (tx) => {
+  return await db.transaction(async (tx) => {
     const [artPieceRow] = await tx
       .insert(artPiece)
       .values({ title, description, year, module, subject })
       .returning();
 
-    if (mediaItems && mediaItems.length) {
-      await tx.insert(media).values(
-        mediaItems.map((item) => ({
-          ...item,
-          artPieceId: artPieceRow.id,
-        })),
-      );
+    let insertedMedia: any[] = [];
+    if (mediaItems && mediaItems.length > 0) {
+      insertedMedia = await tx
+        .insert(media)
+        .values(
+          mediaItems.map((item) => ({
+            ...item,
+            artPieceId: artPieceRow.id,
+          })),
+        )
+        .returning();
     }
 
     return {
       ...artPieceRow,
-      media: mediaItems || [],
+      media: insertedMedia,
     };
   });
 };
@@ -46,146 +56,221 @@ export const updateArtPiece = async (
   id: string,
   input: UpdateArtPieceInput,
 ) => {
-  const { year, module, ...rest } = input;
+  const {
+    title,
+    description,
+    year,
+    module,
+    subject,
+    updatedMedia,
+    newMedia,
+    deletedMedia,
+  } = input;
 
-  if (!validModules[year as number].includes(module as number)) {
+  const [existing] = await db
+    .select()
+    .from(artPiece)
+    .where(eq(artPiece.id, id));
+
+  if (!existing) {
+    throw new ArtPieceNotFoundError("Art piece not found");
+  }
+
+  const targetYear = year ?? existing.year;
+  const targetModule = module ?? existing.module;
+
+  if (!validModules[targetYear]?.includes(targetModule)) {
     throw new InvalidModuleError("Invalid module for the specified year");
   }
 
-  const updated = await prisma.artPiece.update({
-    where: {
-      id: req.params.id,
-    },
-    data: rest,
-  });
-  return updated;
-};
-
-export const deleteArtPiece = async (req, res) => {
-  try {
-    await prisma.$transaction([
-      prisma.media.deleteMany({
-        where: {
-          artPieceId: req.params.id,
-        },
-      }),
-      prisma.artPiece.delete({
-        where: {
-          id: req.params.id,
-        },
-      }),
-    ]);
-
-    res
-      .json({
-        message: "Art piece and associated media deleted successfully",
-      })
-      .status(204);
-  } catch (error) {
-    console.error("Error deleting art piece:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-export const findArtPieceById = async (req, res) => {
-  try {
-    const artPiece = await prisma.artPiece.findFirst({
-      where: {
-        id: req.params.id,
-      },
-      include: {
-        media: true,
-      },
-    });
-
-    if (!artPiece) {
-      return res.status(404).json({ error: "Art piece not found" });
+  return await db.transaction(async (tx) => {
+    if (deletedMedia && deletedMedia.length > 0) {
+      await tx.delete(media).where(inArray(media.id, deletedMedia));
     }
 
-    res.json({ data: artPiece });
-  } catch (error) {
-    console.error("Error fetching art piece:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+    if (newMedia && newMedia.length > 0) {
+      await tx.insert(media).values(
+        newMedia.map((item) => ({
+          ...item,
+          artPieceId: id,
+        })),
+      );
+    }
 
-export const findArtPiecesByYearModule = async (year, module) => {
-  return await prisma.artPiece.findMany({
-    where: {
-      year,
-      module,
-    },
-    include: {
-      media: true,
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
+    if (updatedMedia && updatedMedia.length > 0) {
+      for (const item of updatedMedia) {
+        if (item.order !== undefined) {
+          await tx
+            .update(media)
+            .set({ order: item.order })
+            .where(eq(media.id, item.id));
+        }
+      }
+    }
+
+    const updateData: Partial<typeof artPiece.$inferInsert> = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (year !== undefined) updateData.year = year;
+    if (module !== undefined) updateData.module = module;
+    if (subject !== undefined) updateData.subject = subject;
+
+    let updatedRow = existing;
+    if (Object.keys(updateData).length > 0) {
+      const [updated] = await tx
+        .update(artPiece)
+        .set(updateData)
+        .where(eq(artPiece.id, id))
+        .returning();
+      updatedRow = updated;
+    }
+
+    const currentMedia = await tx
+      .select()
+      .from(media)
+      .where(eq(media.artPieceId, id))
+      .orderBy(asc(media.order));
+
+    return {
+      ...updatedRow,
+      media: currentMedia,
+    };
   });
 };
 
-export const findArtPiecesByYearModuleSubject = async (req, res) => {
-  const subjectParam = req.query.subject;
-  let artPieces = null;
-  if (subjectParam === "werkpraktijk") {
-    artPieces = await prisma.artPiece.findMany({
-      where: {
-        subject: { in: [Subject.WERKPRAKTIJK_1, Subject.WERKPRAKTIJK_2] },
-        year: req.query.year,
-        module: req.query.module,
-      },
-      include: {
-        media: true,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
-  } else if (subjectParam === "kennis") {
-    artPieces = await prisma.artPiece.findMany({
-      where: {
-        subject: { in: [Subject.THEORIE, Subject.SKILLS] },
-        year: req.query.year,
-        module: req.query.module,
-      },
-      include: {
-        media: true,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
-  } else if (subjectParam === "positionering") {
-    artPieces = await prisma.artPiece.findMany({
-      where: {
-        subject: Subject.POSITIONERING,
-        year: req.query.year,
-        module: req.query.module,
-      },
-      include: {
-        media: true,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
-  } else {
-    return res.status(400).json({ error: "Invalid subject" });
+export const deleteArtPiece = async (id: string) => {
+  const [existing] = await db
+    .select()
+    .from(artPiece)
+    .where(eq(artPiece.id, id));
+
+  if (!existing) {
+    throw new ArtPieceNotFoundError("Art piece not found");
   }
-  res.json({ data: artPieces });
+
+  return await db.transaction(async (tx) => {
+    await tx.delete(media).where(eq(media.artPieceId, id));
+    await tx.delete(artPiece).where(eq(artPiece.id, id));
+
+    return { message: "Art piece and associated media deleted successfully" };
+  });
 };
 
-export const listPortfolioPieces = async (req, res) => {
-  const portfolioPieces = await prisma.artPiece.findMany({
-    where: {
-      subject: "PORTFOLIO",
-    },
-    include: {
-      media: true,
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-  });
-  res.json({ data: portfolioPieces });
+export const findArtPieceById = async (id: string) => {
+  const [found] = await db
+    .select()
+    .from(artPiece)
+    .where(eq(artPiece.id, id));
+
+  if (!found) {
+    throw new ArtPieceNotFoundError("Art piece not found");
+  }
+
+  const mediaItems = await db
+    .select()
+    .from(media)
+    .where(eq(media.artPieceId, id))
+    .orderBy(asc(media.order));
+
+  return {
+    ...found,
+    media: mediaItems,
+  };
+};
+
+export const findArtPiecesByYearModule = async (
+  year: number,
+  moduleNumber: number,
+) => {
+  const pieces = await db
+    .select()
+    .from(artPiece)
+    .where(and(eq(artPiece.year, year), eq(artPiece.module, moduleNumber)))
+    .orderBy(asc(artPiece.createdAt));
+
+  const pieceIds = pieces.map((p) => p.id);
+  const mediaItems =
+    pieceIds.length > 0
+      ? await db
+          .select()
+          .from(media)
+          .where(inArray(media.artPieceId, pieceIds))
+          .orderBy(asc(media.order))
+      : [];
+
+  return pieces.map((p) => ({
+    ...p,
+    media: mediaItems.filter((m) => m.artPieceId === p.id),
+  }));
+};
+
+export const findArtPiecesByYearModuleSubject = async (
+  year: number,
+  moduleNumber: number,
+  subjectParam: string,
+) => {
+  let subjects: Subject[];
+  switch (subjectParam) {
+    case "werkpraktijk":
+      subjects = [Subject.WERKPRAKTIJK_1, Subject.WERKPRAKTIJK_2];
+      break;
+    case "kennis":
+      subjects = [Subject.THEORIE, Subject.SKILLS];
+      break;
+    case "positionering":
+      subjects = [Subject.POSITIONERING];
+      break;
+    default:
+      throw new InvalidModuleError("Invalid subject");
+  }
+
+  const pieces = await db
+    .select()
+    .from(artPiece)
+    .where(
+      and(
+        eq(artPiece.year, year),
+        eq(artPiece.module, moduleNumber),
+        inArray(artPiece.subject, subjects as any),
+      ),
+    )
+    .orderBy(asc(artPiece.createdAt));
+
+  const pieceIds = pieces.map((p) => p.id);
+  const mediaItems =
+    pieceIds.length > 0
+      ? await db
+          .select()
+          .from(media)
+          .where(inArray(media.artPieceId, pieceIds))
+          .orderBy(asc(media.order))
+      : [];
+
+  return pieces.map((p) => ({
+    ...p,
+    media: mediaItems.filter((m) => m.artPieceId === p.id),
+  }));
+};
+
+export const listPortfolioPieces = async () => {
+  const pieces = await db
+    .select()
+    .from(artPiece)
+    .where(eq(artPiece.subject, Subject.PORTFOLIO))
+    .orderBy(asc(artPiece.createdAt));
+
+  const pieceIds = pieces.map((p) => p.id);
+  const mediaItems =
+    pieceIds.length > 0
+      ? await db
+          .select()
+          .from(media)
+          .where(inArray(media.artPieceId, pieceIds))
+          .orderBy(asc(media.order))
+      : [];
+
+  return pieces.map((p) => ({
+    ...p,
+    media: mediaItems.filter((m) => m.artPieceId === p.id),
+  }));
 };

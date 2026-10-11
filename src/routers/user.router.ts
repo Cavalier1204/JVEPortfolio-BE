@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { handleInputErrors } from "../middleware/validation.middleware";
-import { signin } from "../services/user.service";
+import { z } from "zod";
+import { validate } from "../middleware/validation.middleware";
+import userController from "../controllers/user.controller";
 
 const router = Router();
 
-router.post(
-  "/signin",
-  body("username").isString(),
-  body("password").isString(),
-  handleInputErrors,
-  signin,
-);
+export const SigninSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+});
+
+router.post("/signin", validate(SigninSchema), userController.signinHandler);
 
 export default router;
