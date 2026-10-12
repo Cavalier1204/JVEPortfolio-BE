@@ -30,6 +30,7 @@ export const user = pgTable(
       .notNull(),
     username: varchar({ length: 255 }).notNull(),
     password: varchar({ length: 255 }).notNull(),
+    role: varchar({ length: 255 }).default("ADMIN").notNull(),
   },
   (table) => [
     uniqueIndex("User_username_key").using(
@@ -48,7 +49,7 @@ export const media = pgTable(
       .notNull(),
     locationReference: text().notNull(),
     order: integer().notNull(),
-    artPieceId: text().notNull(),
+    artPieceId: uuid().notNull(),
   },
   (table) => [
     foreignKey({

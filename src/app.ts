@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import artPieceRouter from "./routers/artPiece.router";
 import mediaRouter from "./routers/media.router";
 import userRouter from "./routers/user.router";
@@ -11,6 +12,11 @@ import { setupSwagger } from "./docs/swagger";
 const app = express();
 
 const WHITELIST = env.ALLOWED_ORIGINS;
+const localOrigins = [
+  `http://localhost:${env.PORT}`,
+  `http://127.0.0.1:${env.PORT}`,
+];
+
 var corsOptions = {
   origin: function (
     origin: string | undefined,
@@ -18,7 +24,11 @@ var corsOptions = {
   ) {
     if (!origin) return callback(null, true);
 
-    if (WHITELIST.indexOf(origin) !== -1) {
+    const isWhitelisted = WHITELIST.indexOf(origin) !== -1;
+    const isLocalDev =
+      env.NODE_ENV !== "production" && localOrigins.includes(origin);
+
+    if (isWhitelisted || isLocalDev) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -30,6 +40,7 @@ var corsOptions = {
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(env.JWT_SECRET));
 app.use(cors(corsOptions));
 
 setupSwagger(app);
