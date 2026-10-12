@@ -1,6 +1,6 @@
 import { hashPassword } from "../middleware/auth.middleware";
 import { db } from "../drizzle/db";
-import { user, artPiece } from "../drizzle/schema";
+import { user, artPiece, media } from "../drizzle/schema";
 import { env } from "../config/env";
 import { Subject } from "../types/enums/subject";
 
@@ -22,6 +22,10 @@ async function main() {
   ) {
     throw new Error("❌ Seeding aborted: production database detected!");
   }
+
+  await db.delete(media);
+  await db.delete(artPiece);
+  await db.delete(user);
 
   await db.insert(user).values({
     username: "testuser1",

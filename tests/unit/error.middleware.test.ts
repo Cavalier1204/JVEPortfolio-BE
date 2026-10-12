@@ -5,6 +5,7 @@ import {
   InvalidModuleError,
   ArtPieceNotFoundError,
   UnauthorizedError,
+  AdminAlreadyExistsError,
 } from "../../src/errors/domain.errors";
 
 describe("Error Middleware", () => {
@@ -53,6 +54,21 @@ describe("Error Middleware", () => {
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
       error: "access restricted",
+    });
+  });
+
+  it("should handle AdminAlreadyExistsError and return 409 with error message", () => {
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as unknown as Response;
+
+    const error = new AdminAlreadyExistsError("Admin user already exists");
+    errorHandler(error, req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Admin user already exists",
     });
   });
 

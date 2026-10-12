@@ -74,6 +74,22 @@ export const SigninResponseSchema = registry.register(
   }),
 );
 
+export const UserResponseSchema = registry.register(
+  "UserResponse",
+  z.object({
+    id: z.string().uuid(),
+    username: z.string(),
+    role: z.string(),
+  }),
+);
+
+export const LogoutResponseSchema = registry.register(
+  "LogoutResponse",
+  z.object({
+    message: z.string(),
+  }),
+);
+
 export const ErrorResponseSchema = registry.register(
   "ErrorResponse",
   z.object({
@@ -103,7 +119,7 @@ registry.registerPath({
   method: "post",
   path: "/user/signin",
   tags: ["Auth"],
-  summary: "Sign in user to obtain JWT token",
+  summary: "Sign in user, set signed HttpOnly auth cookie, and return user profile",
   request: {
     body: {
       content: {
@@ -118,7 +134,7 @@ registry.registerPath({
       description: "Successful authentication",
       content: {
         "application/json": {
-          schema: SigninResponseSchema,
+          schema: UserResponseSchema,
         },
       },
     },
@@ -127,6 +143,57 @@ registry.registerPath({
     },
     401: {
       description: "Unauthorized credentials",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    429: {
+      description: "Too many sign-in attempts",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/user/logout",
+  tags: ["Auth"],
+  summary: "Log out user and clear auth cookie",
+  responses: {
+    200: {
+      description: "Successfully logged out",
+      content: {
+        "application/json": {
+          schema: LogoutResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/user/me",
+  tags: ["Auth"],
+  summary: "Get current authenticated user info",
+  security: [{ [bearerAuth.name]: [] }],
+  responses: {
+    200: {
+      description: "Current user details",
+      content: {
+        "application/json": {
+          schema: UserResponseSchema,
+        },
+      },
+    },
+    401: {
+      description: "Missing or invalid token / cookie",
       content: {
         "application/json": {
           schema: ErrorResponseSchema,

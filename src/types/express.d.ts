@@ -3,6 +3,7 @@ import { Request } from "express";
 export interface UserPayload {
   id: string;
   username: string;
+  role?: string;
 }
 
 declare module "express-serve-static-core" {

@@ -9,24 +9,35 @@ export const createJWT = (user: UserPayload) => {
     {
       id: user.id,
       username: user.username,
+      ...(user.role ? { role: user.role } : {}),
     },
     env.JWT_SECRET,
+    { expiresIn: "7d" },
   );
   return token;
 };
 
 export const protect = (req: Request, res: Response, next: NextFunction) => {
-  const bearer = req.headers.authorization;
+  let token: string | undefined =
+    typeof req.signedCookies?.auth_token === "string"
+      ? req.signedCookies.auth_token
+      : undefined;
 
-  if (!bearer) {
-    res.status(401).json({ message: "not authorized" });
-    return;
-  }
-
-  const [, token] = bearer.split(" ");
   if (!token) {
-    res.status(401).json({ message: "invalid token" });
-    return;
+    const bearer = req.headers.authorization;
+
+    if (!bearer) {
+      res.status(401).json({ message: "not authorized" });
+      return;
+    }
+
+    const [, bearerToken] = bearer.split(" ");
+    if (!bearerToken) {
+      res.status(401).json({ message: "invalid token" });
+      return;
+    }
+
+    token = bearerToken;
   }
 
   try {
@@ -44,5 +55,5 @@ export const comparePasswords = (password: string, hash: string) => {
 };
 
 export const hashPassword = (password: string) => {
-  return bcrypt.hash(password, 5);
+  return bcrypt.hash(password, 12);
 };

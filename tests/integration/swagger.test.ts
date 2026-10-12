@@ -26,6 +26,8 @@ describe("Integration: Swagger Documentation", () => {
       // Verify all key endpoints are documented
       expect(res.body.paths["/health"]).toBeDefined();
       expect(res.body.paths["/user/signin"]).toBeDefined();
+      expect(res.body.paths["/user/logout"]).toBeDefined();
+      expect(res.body.paths["/user/me"]).toBeDefined();
       expect(res.body.paths["/artPiece"]).toBeDefined();
       expect(res.body.paths["/artPiece/module"]).toBeDefined();
       expect(res.body.paths["/artPiece/subject"]).toBeDefined();
