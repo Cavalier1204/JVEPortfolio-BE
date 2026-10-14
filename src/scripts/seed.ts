@@ -1,5 +1,5 @@
 import { hashPassword } from "../middleware/auth.middleware";
-import { db } from "../drizzle/db";
+import { db, pool } from "../drizzle/db";
 import { user, artPiece, media } from "../drizzle/schema";
 import { env } from "../config/env";
 import { Subject } from "../types/enums/subject";
@@ -13,12 +13,12 @@ const subjects: Subject[] = [
 ];
 
 async function main() {
-  const dbUrl = env.DATABASE_URL ?? "";
+  const dbHost = env.DB.HOST;
 
   if (
     env.NODE_ENV === "production" ||
-    dbUrl.includes("koyeb") ||
-    dbUrl.includes("ep-damp-dew")
+    dbHost.includes("koyeb") ||
+    dbHost.includes("ep-damp-dew")
   ) {
     throw new Error("❌ Seeding aborted: production database detected!");
   }
@@ -39,14 +39,17 @@ async function main() {
     for (let module = moduleStart; module <= moduleEnd; module++) {
       for (const subject of subjects) {
         for (let i = 0; i < 3; i++) {
-          await db.insert(artPiece).values({
-            title: "ArtPiece title " + (i + 1),
-            description:
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempus, augue sit amet ullamcorper tempus, erat odio lobortis purus, eget auctor magna ligula vitae lectus. Nulla varius sagittis maximus. Sed sed rhoncus odio. Sed pellentesque risus ut ipsum malesuada, vel varius dolor volutpat. Curabitur blandit sem ut consectetur pellentesque. Maecenas a hendrerit augue. Praesent euismod ipsum nec maximus semper. Sed a sapien at enim placerat bibendum. Maecenas at lectus justo. Phasellus nec placerat ex. ",
-            year,
-            module,
-            subject,
-          });
+          const [insertedArtPiece] = await db
+            .insert(artPiece)
+            .values({
+              title: "ArtPiece title " + (i + 1),
+              description:
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempus, augue sit amet ullamcorper tempus, erat odio lobortis purus, eget auctor magna ligula vitae lectus. Nulla varius sagittis maximus. Sed sed rhoncus odio. Sed pellentesque risus ut ipsum malesuada, vel varius dolor volutpat. Curabitur blandit sem ut consectetur pellentesque. Maecenas a hendrerit augue. Praesent euismod ipsum nec maximus semper. Sed a sapien at enim placerat bibendum. Maecenas at lectus justo. Phasellus nec placerat ex. ",
+              year,
+              module,
+              subject,
+            })
+            .returning();
         }
       }
     }
@@ -54,11 +57,13 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(async (e) => {
     console.error(e);
+    await pool.end();
     process.exit(1);
   })
   .finally(async () => {
+    await pool.end();
     console.log("Database seeded!");
     process.exit(0);
   });
