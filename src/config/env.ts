@@ -12,7 +12,6 @@ export const env = {
   PORT: parseInt(process.env.PORT ?? "3000"),
   NODE_ENV: process.env.NODE_ENV ?? "development",
   ALLOWED_ORIGINS: required("ALLOWED_ORIGINS"),
-  DATABASE_URL: required("DATABASE_URL"),
   JWT_SECRET: required("JWT_SECRET"),
 
   DB: {
