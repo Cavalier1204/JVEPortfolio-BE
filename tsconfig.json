@@ -4,10 +4,12 @@
     "outDir": "./dist",
     "resolveJsonModule": true,
     "rootDir": "./src",
-    "strict": false,
+    "strict": true,
     "lib": ["esnext"],
     "esModuleInterop": true,
-    "declaration": true
+    "skipLibCheck": true,
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts"]
 }

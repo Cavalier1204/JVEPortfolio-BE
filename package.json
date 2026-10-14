@@ -1,32 +1,54 @@
 {
   "name": "jve-portfolio-backend",
   "version": "1.2.0",
-  "main": "index.ts",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "check": "tsc --noEmit",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
+    "start": "node dist/server.js",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
-    "seed": "npx prisma migrate reset --force"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "seed": "tsx src/scripts/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^7.3.0",
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
-    "express-validator": "^7.0.1",
+    "express-rate-limit": "^8.7.1",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "pg": "^8.18.0",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^25.2.0",
-    "prisma": "^7.3.0",
+    "@types/pg": "^8.16.0",
+    "@types/supertest": "^7.2.1",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@vitest/coverage-v8": "^4.1.11",
+    "drizzle-kit": "^0.31.8",
+    "supertest": "^7.3.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "vitest": "^4.1.11"
   }
 }
