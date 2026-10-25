@@ -1,42 +1,31 @@
-import express from "express";
-import cors from "cors";
-import protectedRouter from "./routers/protectedRouter";
-import publicRouter from "./routers/publicRouter";
-import morgan from "morgan";
-import { protect } from "./modules/auth";
-import { signin } from "./handlers/user";
-import { body } from "express-validator";
-import { handleInputErrors } from "./modules/middleware";
+import app from "./app";
+import { env } from "./config/env";
+import { pool } from "./drizzle/db";
 
-const app = express();
+const server = app.listen(env.PORT, () => {
+  console.log("NODE_ENV:", env.NODE_ENV, "PORT:", env.PORT);
+});
 
-const corsOptions = {
-  origin: JSON.parse(process.env.ALLOWED_ORIGINS ?? "[]"),
-  methods: ["GET", "POST", "PUT", "DELETE"],
+export const handleShutdown = (signal: string): Promise<void> => {
+  console.log(`Received ${signal}. Shutting down gracefully...`);
+  return new Promise((resolve) => {
+    server.close(async () => {
+      console.log("HTTP server closed.");
+      try {
+        await pool.end();
+        console.log("Database connection pool closed.");
+        resolve();
+        process.exit(0);
+      } catch (err) {
+        console.error("Error during pool shutdown:", err);
+        resolve();
+        process.exit(1);
+      }
+    });
+  });
 };
 
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors(corsOptions));
+process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+process.on("SIGINT", () => handleShutdown("SIGINT"));
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", message: "Server running healthy!" });
-});
-
-app.use("/api", protect, protectedRouter);
-app.use("/public", publicRouter);
-
-app.post(
-  "/signin",
-  body("username").isString(),
-  body("password").isString(),
-  handleInputErrors,
-  signin
-);
-
-app.use((err, req, res, next) => {
-  res.json({ message: err });
-});
-
-export default app;
+export default server;
