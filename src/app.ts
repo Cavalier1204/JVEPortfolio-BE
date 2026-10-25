@@ -8,6 +8,8 @@ import userRouter from "./routers/user.router";
 import { env } from "./config/env";
 import { errorHandler } from "./middleware/error.middleware";
 import { setupSwagger } from "./docs/swagger";
+import { db } from "./drizzle/db";
+import { sql } from "drizzle-orm";
 
 const app = express();
 
@@ -17,14 +19,14 @@ const localOrigins = [
   `http://127.0.0.1:${env.PORT}`,
 ];
 
-var corsOptions = {
+const corsOptions = {
   origin: function (
     origin: string | undefined,
     callback: (arg0: Error | null, arg1?: boolean | undefined) => void,
   ) {
     if (!origin) return callback(null, true);
 
-    const isWhitelisted = WHITELIST.indexOf(origin) !== -1;
+    const isWhitelisted = WHITELIST.includes(origin);
     const isLocalDev =
       env.NODE_ENV !== "production" && localOrigins.includes(origin);
 
@@ -45,8 +47,15 @@ app.use(cors(corsOptions));
 
 setupSwagger(app);
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok", message: "Server running healthy!" });
+app.get("/health", async (_req, res) => {
+  try {
+    await db.execute(sql`SELECT 1`);
+    res.status(200).json({ status: "ok", message: "Server running healthy!" });
+  } catch {
+    res
+      .status(503)
+      .json({ status: "error", message: "Database connection failed" });
+  }
 });
 
 app.use("/artPiece", artPieceRouter);

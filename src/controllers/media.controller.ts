@@ -7,7 +7,7 @@ export const updateMediaHandler = async (
   next: NextFunction,
 ) => {
   try {
-    const artPieceId = (req.params.artPieceId as string);
+    const artPieceId = req.params.artPieceId as string;
     const input: UpdateMediaInput = req.body;
 
     await updateMedia(artPieceId, input);

@@ -50,6 +50,27 @@ async function main() {
               subject,
             })
             .returning();
+
+          await db.insert(media).values([
+            {
+              artPieceId: insertedArtPiece.id,
+              locationReference:
+                "images/7a5f2b5f-78c9-434d-b612-5cd85b87fed7.jpg",
+              order: 1,
+            },
+            {
+              artPieceId: insertedArtPiece.id,
+              locationReference:
+                "images/7a5f2b5f-78c9-434d-b612-5cd85b87fed7.jpg",
+              order: 2,
+            },
+            {
+              artPieceId: insertedArtPiece.id,
+              locationReference:
+                "images/7a5f2b5f-78c9-434d-b612-5cd85b87fed7.jpg",
+              order: 3,
+            },
+          ]);
         }
       }
     }

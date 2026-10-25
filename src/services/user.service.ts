@@ -6,7 +6,10 @@ import {
   createJWT,
   hashPassword,
 } from "../middleware/auth.middleware";
-import { UnauthorizedError, AdminAlreadyExistsError } from "../errors/domain.errors";
+import {
+  UnauthorizedError,
+  AdminAlreadyExistsError,
+} from "../errors/domain.errors";
 
 export interface UserInput {
   username: string;

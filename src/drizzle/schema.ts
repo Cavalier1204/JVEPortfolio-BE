@@ -6,7 +6,6 @@ import {
   integer,
   uniqueIndex,
   foreignKey,
-  serial,
   pgEnum,
   uuid,
 } from "drizzle-orm/pg-core";

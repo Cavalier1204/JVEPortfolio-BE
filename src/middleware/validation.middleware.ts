@@ -13,14 +13,18 @@ export const validate =
   };
 
 export const validateQuery =
-  (schema: ZodTypeAny) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (schema: ZodTypeAny) => (req: Request, res: Response, next: NextFunction) => {
     try {
       const parsed = schema.parse(req.query);
-      for (const key of Object.keys(req.query)) {
-        delete (req.query as any)[key];
+      if (!res.locals) {
+        res.locals = {};
       }
-      Object.assign(req.query, parsed);
+      res.locals.query = parsed;
+      try {
+        req.query = parsed as any;
+      } catch {
+        Object.assign(req.query, parsed);
+      }
       next();
     } catch (error: any) {
       const errors = error.issues ?? error.errors ?? [error.message];

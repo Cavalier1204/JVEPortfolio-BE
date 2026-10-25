@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../../src/app";
 import * as userService from "../../src/services/user.service";
-import { UnauthorizedError } from "../../src/errors/domain.errors";
+import {
+  UnauthorizedError,
+  AdminAlreadyExistsError,
+} from "../../src/errors/domain.errors";
 import { createJWT } from "../../src/middleware/auth.middleware";
 import { signinRateLimitStore } from "../../src/routers/user.router";
 

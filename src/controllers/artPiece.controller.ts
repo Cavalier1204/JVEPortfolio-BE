@@ -11,7 +11,13 @@ import {
 import {
   CreateArtPieceInput,
   UpdateArtPieceInput,
+  GetArtPiecesQuerySchema,
+  GetArtPiecesSubjectQuerySchema,
 } from "../types/artPiece.types";
+import { z } from "zod";
+
+type GetArtPiecesQuery = z.infer<typeof GetArtPiecesQuerySchema>;
+type GetArtPiecesSubjectQuery = z.infer<typeof GetArtPiecesSubjectQuerySchema>;
 
 export const createArtPieceHandler = async (
   req: Request,
@@ -76,7 +82,8 @@ export const getArtPiecesByYearModuleHandler = async (
   next: NextFunction,
 ) => {
   try {
-    const { year, module: moduleNum } = req.query as any;
+    const query = (res.locals.query ?? req.query) as GetArtPiecesQuery;
+    const { year, module: moduleNum } = query;
     const artPieces = await findArtPiecesByYearModule(
       Number(year),
       Number(moduleNum),
@@ -93,7 +100,8 @@ export const getArtPiecesByYearModuleSubjectHandler = async (
   next: NextFunction,
 ) => {
   try {
-    const { year, module: moduleNum, subject } = req.query as any;
+    const query = (res.locals.query ?? req.query) as GetArtPiecesSubjectQuery;
+    const { year, module: moduleNum, subject } = query;
     const artPieces = await findArtPiecesByYearModuleSubject(
       Number(year),
       Number(moduleNum),
