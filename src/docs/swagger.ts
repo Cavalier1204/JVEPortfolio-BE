@@ -112,6 +112,14 @@ registry.registerPath({
         },
       },
     },
+    503: {
+      description: "Database connection failed",
+      content: {
+        "application/json": {
+          schema: HealthResponseSchema,
+        },
+      },
+    },
   },
 });
 
@@ -119,7 +127,8 @@ registry.registerPath({
   method: "post",
   path: "/user/signin",
   tags: ["Auth"],
-  summary: "Sign in user, set signed HttpOnly auth cookie, and return user profile",
+  summary:
+    "Sign in user, set signed HttpOnly auth cookie, and return user profile",
   request: {
     body: {
       content: {

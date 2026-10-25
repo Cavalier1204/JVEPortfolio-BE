@@ -44,7 +44,7 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
     const user = jwt.verify(token, env.JWT_SECRET);
     req.user = user as UserPayload;
     next();
-  } catch (e) {
+  } catch {
     res.status(401).json({ message: "not authorized" });
     return;
   }

@@ -1,16 +1,47 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import request from "supertest";
+
+vi.mock("../../src/drizzle/db", () => ({
+  db: {
+    execute: vi.fn(),
+  },
+  pool: {
+    end: vi.fn(),
+  },
+}));
+
+import { db } from "../../src/drizzle/db";
 import app from "../../src/app";
 
 describe("Integration: Health & CORS", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.execute).mockResolvedValue([{ 1: 1 }] as any);
+  });
+
   describe("GET /health", () => {
-    it("should return 200 and healthy status message", async () => {
+    it("should return 200 and healthy status message when database is connected", async () => {
       const res = await request(app).get("/health");
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual({
         status: "ok",
         message: "Server running healthy!",
+      });
+      expect(db.execute).toHaveBeenCalled();
+    });
+
+    it("should return 503 when database connection ping fails", async () => {
+      vi.mocked(db.execute).mockRejectedValueOnce(
+        new Error("Database connection timeout"),
+      );
+
+      const res = await request(app).get("/health");
+
+      expect(res.status).toBe(503);
+      expect(res.body).toEqual({
+        status: "error",
+        message: "Database connection failed",
       });
     });
   });
@@ -37,6 +68,19 @@ describe("Integration: Health & CORS", () => {
       const res = await request(app)
         .get("/health")
         .set("Origin", "http://unauthorized-domain.com");
+
+      expect(res.status).toBe(500);
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          error: "Internal server error",
+        }),
+      );
+    });
+
+    it("should reject requests from origin that contains whitelisted origin as substring", async () => {
+      const res = await request(app)
+        .get("/health")
+        .set("Origin", "http://localhost:5173.attacker.com");
 
       expect(res.status).toBe(500);
       expect(res.body).toEqual(

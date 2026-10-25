@@ -33,11 +33,4 @@ router.put(
   mediaController.updateMediaHandler,
 );
 
-router.put(
-  "/media/:artPieceId",
-  protect,
-  validate(UpdateMediaSchema),
-  mediaController.updateMediaHandler,
-);
-
 export default router;

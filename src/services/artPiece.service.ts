@@ -8,7 +8,7 @@ import {
   InvalidModuleError,
 } from "../errors/domain.errors";
 import { db } from "../drizzle/db";
-import { artPiece, media } from "../drizzle/schema";
+import { artPiece, media, subject as subjectEnum } from "../drizzle/schema";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { Subject } from "../types/enums/subject";
 
@@ -157,10 +157,7 @@ export const deleteArtPiece = async (id: string) => {
 };
 
 export const findArtPieceById = async (id: string) => {
-  const [found] = await db
-    .select()
-    .from(artPiece)
-    .where(eq(artPiece.id, id));
+  const [found] = await db.select().from(artPiece).where(eq(artPiece.id, id));
 
   if (!found) {
     throw new ArtPieceNotFoundError("Art piece not found");
@@ -209,7 +206,7 @@ export const findArtPiecesByYearModuleSubject = async (
   moduleNumber: number,
   subjectParam: string,
 ) => {
-  let subjects: Subject[];
+  let subjects: (typeof subjectEnum.enumValues)[number][];
   switch (subjectParam) {
     case "werkpraktijk":
       subjects = [Subject.WERKPRAKTIJK_1, Subject.WERKPRAKTIJK_2];
@@ -231,7 +228,7 @@ export const findArtPiecesByYearModuleSubject = async (
       and(
         eq(artPiece.year, year),
         eq(artPiece.module, moduleNumber),
-        inArray(artPiece.subject, subjects as any),
+        inArray(artPiece.subject, subjects),
       ),
     )
     .orderBy(asc(artPiece.createdAt));
